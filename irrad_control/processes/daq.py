@@ -434,9 +434,11 @@ class DAQProcess(Process):
             # Loop over all servers and connect to their respective data streams
             for s in stream:
                 external_sub.connect(s)
+            logging.debug(f"connected external sub for {kind}")
 
             # Subscribe to all topics
             external_sub.setsockopt(zmq.SUBSCRIBE, b'')  # specify bytes for Py3
+            logging.debug(f"subscribed for {kind}")
 
             if pub_results:
                 internal_pub = self.create_internal_data_pub()
