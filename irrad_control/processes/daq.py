@@ -465,6 +465,7 @@ class DAQProcess(Process):
             external_sub.close()
             if pub_results:
                 internal_pub.close()
+            logging.info(f'finished setup of receiving {kind}')
 
         else:
             logging.error("No streams to connect to. Add streams via '_add_stream'-method")

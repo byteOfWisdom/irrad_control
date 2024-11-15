@@ -768,6 +768,7 @@ class IrradConverter(DAQProcess):
             actual_irrad_event.active = tc
             event_dict = {'server': server}
             event_dict.update(self.irrad_events[server].to_dict(event_name))
+            logging.debug(event_dict)
             self.sockets['event'].send_json(event_dict)
 
         # Store event data if an event changed state from active to inactive or vice-versa
