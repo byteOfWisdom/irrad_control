@@ -1,7 +1,7 @@
 from enum import Enum
 from threading import Event
 from time import time
-
+import logging
 
 class BaseEvent(object):
 
@@ -30,7 +30,7 @@ class BaseEvent(object):
 
     def __init__(self, cooldown=0, description=''):
         super().__init__()
-        
+
         self.cooldown = cooldown
         self.description = description
 
@@ -86,6 +86,8 @@ def create_irrad_events():
 
         @classmethod
         def beam_ok(cls):
+            #----------------------------------- Debug stuff
+            logging.critical("beam_ok " + str(not any(ev.value.is_valid() for ev in cls.beam_events())))
             return not any(ev.value.is_valid() for ev in cls.beam_events())
 
         @classmethod

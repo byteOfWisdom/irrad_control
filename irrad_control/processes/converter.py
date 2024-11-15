@@ -160,7 +160,7 @@ class IrradConverter(DAQProcess):
             # Create histogram group and entries
             self.output_table.create_group('/{}'.format(server_setup['name']), 'Histogram')
             for hist_name in ('beam_position', 'see_horizontal', 'see_vertical', 'sey'):
-                
+
                 actual_hist_type = 'see' if 'see' in hist_name else hist_name
 
                 hist, edges, centers = self.hists.create_hist(hist_name=actual_hist_type)
@@ -244,7 +244,7 @@ class IrradConverter(DAQProcess):
                 self.data_flags[server][dname] = False
 
         if 'RadiationMonitor' in server_setup['devices']:
-            
+
             names = ['timestamp', 'dose_rate', 'frequency']
             dtype = self.dtypes.generic_dtype(names=names, dtypes=['<f8', '<f4', '<f4'])
             dname = 'rad_monitor'
@@ -261,7 +261,7 @@ class IrradConverter(DAQProcess):
             self.data_flags[server][dname] = False
 
     def _setup_daq_parameters(self, server, server_setup):
-        
+
         daq_setup = server_setup['daq']
 
         self._daq_params[server]['ion'] = self.ions[daq_setup['ion']]
@@ -274,7 +274,7 @@ class IrradConverter(DAQProcess):
             self._lookups[server]['full_scale_current'][ro_ch] = self._get_full_scale_current(server=server,
                                                                                               ch_idx=ro_idx,
                                                                                               ro_device=self.readout_setup[server]['device'])
-            
+
     def _calc_drate(self, server, meta):
 
         # Check if we have incoming data timing stored
@@ -387,7 +387,7 @@ class IrradConverter(DAQProcess):
         self._beam_currents[server][0]['timestamp'] = self.data_arrays[server]['beam']['timestamp']
         self._beam_currents[server][0]['beam'] = self.data_arrays[server]['beam']['beam_current']
         self._beam_currents[server][0]['beam_err'] = self.data_arrays[server]['beam']['beam_current_error']
-        
+
         if self._beam_idxs[server] < self._shifted_beam_array_length - 1:
             self._beam_idxs[server] += 1
 
@@ -413,7 +413,7 @@ class IrradConverter(DAQProcess):
 
         if beam_std >= self._beam_unstable_std_ratio * self._lookups[server]['full_scale_current']['sem_sum']:
             return True
-        
+
         if beam_std / beam_mean >= self._beam_unstable_std_ratio:
             return True
 
@@ -455,7 +455,7 @@ class IrradConverter(DAQProcess):
             relevant_currents = tmp_beam[start_idx:][:10]
 
         return relevant_currents
-    
+
     def _check_remaining_n_scans(self, server):
 
         # Estimate remaining n_scans
@@ -486,7 +486,7 @@ class IrradConverter(DAQProcess):
             self._check_irrad_event(server=server,
                                     event_name='IrradiationComplete',
                                     trigger_condition=lambda n_s=eta_n_scans: n_s < 1)
-        
+
         # Whatever exception happens here does not matter, we are unable to extrapolate the remaining scans is the message
         except Exception as e:
             logging.warning(f"Unable to estimate number of remaining scans due to '{type(e).__name__}:{repr(e)}'")
@@ -553,7 +553,7 @@ class IrradConverter(DAQProcess):
             beam_current = analysis.formulas.calibrated_beam_current(beam_monitor_sig=sig,
                                                                      calibration_factor=ufloat(*self._daq_params[server]['lambda']),
                                                                      full_scale_current=ufloat(sum_ifs, 0.0173 * sum_ifs))
-            
+
             self.data_arrays[server]['beam']['beam_current'] = beam_data['data']['current']['beam_current'] = beam_current.n
             self.data_arrays[server]['beam']['beam_current_error'] = beam_data['data']['current']['beam_current_error'] = beam_current.s
 
@@ -562,7 +562,7 @@ class IrradConverter(DAQProcess):
             see_per_surface = analysis.formulas.v_sig_to_i_sig(v_sig=sig,
                                                                full_scale_current=sum_ifs,
                                                                full_scale_voltage=self._lookups[server]['full_scale_voltage'])
-            
+
             # Number of SEM foils is amount of surfaces e.g. 4 foils is horizontal and vertical SEM e.g. 2 times foil entry & exit == 4 surfaces
             self.data_arrays[server]['see']['see_total'] = beam_data['data']['see']['see_total'] = see_per_surface * len(self._lookups[server]['sem_foils'])
 
@@ -577,9 +577,9 @@ class IrradConverter(DAQProcess):
                                                               full_scale_voltage=self._lookups[server]['full_scale_voltage'])
                 # gamma = I_SEE / I_ion * q_ion
                 sey = see_per_surface / fc_current * self._daq_params[server]['ion'].n_charge * 100  # %
-                
+
                 self.data_arrays[server]['see']['sey'] = beam_data['data']['see']['sey'] = sey
-        
+
         else:
             logging.warning("Beam current cannot be calculated from calibration due to calibration signal of type 'sem_sum' missing")
 
@@ -594,9 +594,9 @@ class IrradConverter(DAQProcess):
             # Only add beam loss to data if we have BLM data
             self.data_arrays[server]['beam']['beam_loss'] = beam_data['data']['current']['beam_loss'] = blm_current
 
-            # This should always be the case, at leasanything else is unphysical  
+            # This should always be the case, at leasanything else is unphysical
             if blm_current <= self.data_arrays[server]['beam']['beam_current'][0]:
-                
+
                 try:
                     # Get beam loss percentage
                     rel_beam_loss = blm_current / self.data_arrays[server]['beam']['beam_current'][0]
@@ -607,7 +607,7 @@ class IrradConverter(DAQProcess):
 
                     # Warn when extracted beam current is corrected
                     if rel_beam_loss >= self._beam_correction_threshold:
-                        
+
                         extracted_current = self.data_arrays[server]['beam']['beam_current'][0] - blm_current
 
 
@@ -618,7 +618,7 @@ class IrradConverter(DAQProcess):
 
                 except ZeroDivisionError:
                     pass
-            
+
             # This case should not exist because blm_current can be at most beam current
             # Due to different sampling timestamps for the ADC channels, this can occure in unstable beam conditions
             # See https://github.com/SiLab-Bonn/irrad_control/issues/69
@@ -673,7 +673,7 @@ class IrradConverter(DAQProcess):
             rel_pos = analysis.formulas.rel_beam_position(sig_a=sig_L, sig_b=sig_R, plane='h')
 
             self.data_arrays[server]['beam']['horizontal_beam_position'] = beam_data['data']['position']['h'] = rel_pos
-            
+
         else:
             logging.warning("Horizontal beam position can not be calculated!")
 
@@ -712,7 +712,7 @@ class IrradConverter(DAQProcess):
         self._check_irrad_event(server=server,
                                 event_name='BeamDrift',
                                 trigger_condition=lambda: (self.data_arrays[server]['beam']['horizontal_beam_position'][0] ** 2 + self.data_arrays[server]['beam']['vertical_beam_position'][0] ** 2) ** .5 > 50)
-        
+
         # If beam is low during scan
         self._check_irrad_event(server=server,
                                 event_name='BeamLow',
@@ -722,12 +722,12 @@ class IrradConverter(DAQProcess):
         self._check_irrad_event(server=server,
                                 event_name='BeamJitter',
                                 trigger_condition=lambda s=server: self._check_beam_unstable(server=s))
-        
+
         # Append data to table within this interpretation cycle
         self.data_flags[server]['beam'] = self.data_flags[server]['see'] = True
 
         return beam_data
-    
+
     def _check_irrad_event(self, server, event_name, trigger_condition):
         """
         Checks whether an event condition is fulfilled and the correspending event flag has the correct state
@@ -746,16 +746,20 @@ class IrradConverter(DAQProcess):
         # If event is not yet ready or disabled return immediately
         if not actual_irrad_event.is_ready() or actual_irrad_event.disabled:
             return
-        
+
         # If it is a beam event but the BeamOff is active
         if 'Beam' in event_name and event_name != 'BeamOff':
             # If the beam is currently down, don't check for beam-related events
             if self.irrad_events[server]['BeamOff'].value.active:
                 return
-        
+
         # Evaluate trigger condition
         tc = trigger_condition()
-        
+
+        # ------------------------------------------------ Debug stuff
+        if "Beam" in event_name:
+            logging.critical("beam event: " + event_name + " " + str(tc))
+
         triggered_but_inactive = tc and not actual_irrad_event.active
         untriggered_but_active = not tc and actual_irrad_event.active
 
@@ -796,7 +800,7 @@ class IrradConverter(DAQProcess):
             self.data_arrays[server]['irrad']['beam_fwhm_y'] = data['beam_fwhm'][1]
 
             # Fluence hist
-            if self._row_fluence_hist[server] is None: 
+            if self._row_fluence_hist[server] is None:
                 self._row_fluence_hist[server] = [0] * data['n_rows']
 
             # Append data to table within this interpretation cycle
@@ -909,7 +913,7 @@ class IrradConverter(DAQProcess):
                                                                                             self._daq_params[server]['ion'].name,
                                                                                             abs_tid.n,
                                                                                             abs_tid.s))
-            
+
             if self.irrad_events[server].IrradiationComplete.value.is_valid():
                 logging.info(f"Irradiation completed!")
 
@@ -994,7 +998,7 @@ class IrradConverter(DAQProcess):
         self.data_arrays[server]['temp_arduino']['timestamp'] = meta['timestamp']
 
         for temp in data:
-            
+
             # Generate Temp events
             if 'blm' in temp.lower():
                 self._check_irrad_event(server=server,
@@ -1019,13 +1023,13 @@ class IrradConverter(DAQProcess):
 
         rad_data = {'meta': {'timestamp': meta['timestamp'], 'name': server, 'type': 'dose_rate'},
                      'data': {}}
-                     
+
         self.data_arrays[server]['rad_monitor']['timestamp'] = meta['timestamp']
 
         self._check_irrad_event(server=server,
                                 event_name='DoseRateHigh',
                                 trigger_condition=lambda d=data['dose_rate']: d > 500)  # uSv/h
-        
+
         for rad in data:
             self.data_arrays[server]['rad_monitor'][rad] = rad_data['data'][rad] = data[rad]
 
@@ -1119,7 +1123,7 @@ class IrradConverter(DAQProcess):
         elif meta_data['type'] == 'rad_monitor':
             rad_data = self._interpret_rad_monitor_data(server=server, data=data, meta=meta_data)
             interpreted_data.append(rad_data)
-            
+
         # A motorstage axis has send movement change data
         elif meta_data['type'] == 'axis':
             self._store_axis_data(server=server, data=data, meta=meta_data)
@@ -1199,7 +1203,7 @@ class IrradConverter(DAQProcess):
                 self.readout_setup[server]['ro_group_scales'][group] = ifs
                 self._update_ifs_values(server=server)
                 self._store_event_parameters(server=server, event=cmd, parameters={'group': group, 'ifs': ifs, 'unit': 'nA'})
-            
+
             elif cmd == 'toggle_event':
                 self.irrad_events[data['server']][data['event']].value.disabled = data['disabled']
 
@@ -1235,7 +1239,7 @@ def run(blocking=True):
 
     irrad_converter = IrradConverter()
     irrad_converter.start()
-    
+
     if blocking:
         irrad_converter.join()
 
