@@ -453,6 +453,7 @@ class DAQProcess(Process):
 
                 # Get data
                 data = external_sub.recv_json(flags=zmq.NOBLOCK)
+                logging.debug(f"got data from {kind} stream")
 
                 # Callback for data
                 result = callback(data)
@@ -465,7 +466,6 @@ class DAQProcess(Process):
             external_sub.close()
             if pub_results:
                 internal_pub.close()
-            logging.info(f'finished setup of receiving {kind}')
 
         else:
             logging.error("No streams to connect to. Add streams via '_add_stream'-method")
