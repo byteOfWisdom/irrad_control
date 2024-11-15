@@ -87,7 +87,7 @@ def create_irrad_events():
         @classmethod
         def beam_ok(cls):
             #----------------------------------- Debug stuff
-            logging.critical(str(cls.beam_events().BeamOff.value))
+            logging.critical(str(cls.beam_events().BeamOff.value.is_valid()))
             return not any(ev.value.is_valid() for ev in cls.beam_events())
 
         @classmethod
