@@ -430,6 +430,7 @@ class DAQProcess(Process):
 
             # Create subscriber for raw and XY-Stage data
             external_sub = self.context.socket(zmq.SUB)
+            logging.debug(f"created socket for {kind}")
 
             # Loop over all servers and connect to their respective data streams
             for s in stream:
