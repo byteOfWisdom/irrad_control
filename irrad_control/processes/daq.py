@@ -441,6 +441,8 @@ class DAQProcess(Process):
             if pub_results:
                 internal_pub = self.create_internal_data_pub()
 
+            logging.debug(f"entering receive loop for {kind}")
+
             # While event not set receive data
             while not self.stop_flags['__recv__'].is_set():
 
