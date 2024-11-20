@@ -42,6 +42,7 @@ class DAQProcess(Process):
         # Call super's init
         super(DAQProcess, self).__init__(*args, **kwargs)
 
+        self.is_converter = True
         # Initialize a name which is connected to this process
         self.pname = name
 
@@ -505,7 +506,7 @@ class DAQProcess(Process):
 
     def recv_event(self):
         """Main method which receives events and calls handle event"""
-        self._recv_from_stream(kind='event_sub', stream=self.event_streams, callback=self.handle_event, delay=1e-2)
+        self._recv_from_stream(kind='events' if self.is_converter else 'event_sub', stream=self.event_streams, callback=self.handle_event, delay=1e-2)
 
     def shutdown(self, signum=None, frame=None):
         """
