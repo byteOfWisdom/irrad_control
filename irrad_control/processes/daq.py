@@ -52,7 +52,7 @@ class DAQProcess(Process):
         # Ports/sockets used by this process
         self.ports = {'log': None, 'cmd': None, 'data': None, 'event': None}
         self.sockets = {'log': None, 'cmd': None, 'data': None, 'event': None}
-        self.socket_type = {'log': zmq.PUB, 'cmd': zmq.REP, 'data': zmq.PUB, 'event': zmq.PUB}
+        self.socket_type = {'log': zmq.PUB, 'cmd': zmq.REP, 'data': zmq.PUB, 'event': zmq.SUB}
 
         # Attribute holding zmq context
         self.context = None
