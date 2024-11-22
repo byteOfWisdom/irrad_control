@@ -29,6 +29,7 @@ class IrradServer(DAQProcess):
 
         # Call init of super class
         super(IrradServer, self).__init__(name=name)
+        self.is_converter = False
 
     def _start_server(self, setup):
         """Sets up the server process"""

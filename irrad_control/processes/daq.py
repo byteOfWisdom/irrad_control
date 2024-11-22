@@ -42,6 +42,8 @@ class DAQProcess(Process):
         # Call super's init
         super(DAQProcess, self).__init__(*args, **kwargs)
 
+        self.is_converter = True
+
         # Initialize a name which is connected to this process
         self.pname = name
 
@@ -52,7 +54,7 @@ class DAQProcess(Process):
         # Ports/sockets used by this process
         self.ports = {'log': None, 'cmd': None, 'data': None, 'event': None}
         self.sockets = {'log': None, 'cmd': None, 'data': None, 'event': None}
-        self.socket_type = {'log': zmq.PUB, 'cmd': zmq.REP, 'data': zmq.PUB, 'event': zmq.PUB}
+        self.socket_type = {'log': zmq.PUB, 'cmd': zmq.REP, 'data': zmq.PUB, 'event': zmq.PUB, 'event_sub' = zmq.SUB}
 
         # Attribute holding zmq context
         self.context = None
@@ -499,7 +501,7 @@ class DAQProcess(Process):
 
     def recv_event(self):
         """Main method which receives events and calls handle event"""
-        self._recv_from_stream(kind='events', stream=self.event_streams, callback=self.handle_event, delay=1e-2)
+        self._recv_from_stream(kind='events' if self.is_converter else 'event_sub', stream=self.event_streams, callback=self.handle_event, delay=1e-2)
 
     def shutdown(self, signum=None, frame=None):
         """
