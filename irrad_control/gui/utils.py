@@ -19,7 +19,7 @@ def fill_combobox_items(cbx, fill_dict):
 
     # Add entire Info to tooltip e.g. date of measured constant, sigma, etc.
     for i, k in enumerate(fill_dict.keys()):
-        
+
         tool_tip = ''
 
         if isinstance(fill_dict[k], dict):
@@ -39,7 +39,7 @@ def fill_combobox_items(cbx, fill_dict):
 
 def get_host_ip():
     """Returns the host IP address on UNIX systems. If not UNIX, returns None"""
-
+    return None
     try:
         host_ip = str(subprocess.check_output(['hostname', '-I']))
     except (OSError, subprocess.CalledProcessError):
